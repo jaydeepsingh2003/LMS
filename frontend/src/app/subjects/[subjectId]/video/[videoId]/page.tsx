@@ -11,6 +11,8 @@ import ChatMessage from "@/components/Ai/ChatMessage";
 import { cn } from "@/lib/utils";
 
 import { useSubjectStore } from "@/store/subjectStore";
+import { extractVideoId } from "@/lib/youtube";
+
 
 export default function VideoPage() {
   const { videoId } = useParams() as any;
@@ -100,9 +102,8 @@ export default function VideoPage() {
   if (loading) return <div className="p-12 text-gray-500 animate-pulse">Loading amazing content...</div>;
   if (!video) return <div className="p-12 text-red-500">Video not found.</div>;
 
-  const youtubeVideoId = video.youtube_url.includes('v=') 
-    ? video.youtube_url.split('v=')[1].split('&')[0] 
-    : video.youtube_url;
+  const youtubeVideoId = extractVideoId(video.youtube_url);
+
 
   return (
     <div className="flex flex-col lg:flex-row max-w-7xl mx-auto p-4 md:p-8 gap-8 animate-in">

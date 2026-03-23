@@ -145,7 +145,15 @@ export const searchPlaylists = async (query: string = "Full Course Engineering")
   }
 };
 
+export const extractVideoId = (input: string): string => {
+  if (!input) return "";
+  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+  const match = input.match(regExp);
+  return (match && match[2].length === 11) ? match[2] : input;
+};
+
 const extractPlaylistId = (input: string): string => {
+
   if (input.includes('list=')) {
     return input.split('list=')[1].split('&')[0];
   }
