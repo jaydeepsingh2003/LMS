@@ -1,12 +1,12 @@
+"use client";
+
+import { useState } from "react";
 import { useSubjectStore } from "@/store/subjectStore";
 import { cn } from "@/lib/utils";
-
 import { Play, CheckCircle, RefreshCw } from "lucide-react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { useState } from "react";
 import apiClient from "@/lib/apiClient";
-import { toast } from "sonner"; // Assuming sonner is available or will be added
 
 
 export default function SubjectPage({ params }: { params: { subjectId: string } }) {
