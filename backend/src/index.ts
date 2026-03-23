@@ -13,6 +13,10 @@ import { prisma } from './config/prisma.js';
 
 dotenv.config();
 
+// Environment Diagnostics
+if (!process.env.DATABASE_URL) console.warn('⚠️ [CONFIG_WARN]: DATABASE_URL is missing.');
+if (!process.env.JWT_ACCESS_SECRET) console.warn('⚠️ [CONFIG_WARN]: JWT_ACCESS_SECRET is missing, using default.');
+
 // Global BigInt serialization fix for Prisma + JSON.stringify
 (BigInt.prototype as any).toJSON = function () {
   return this.toString();
@@ -21,8 +25,14 @@ dotenv.config();
 const app = express();
 const port = env.PORT || 5000;
 
-app.use(cors());
+app.use(cors({
+  origin: '*', // For debugging, allow all. Change to specific domain in production.
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
 app.use(express.json());
+
 
 // Root route
 app.get('/', (req, res) => {
