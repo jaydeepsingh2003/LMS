@@ -26,10 +26,18 @@ export default function SubjectLayout({ children }: { children: React.ReactNode 
     const fetchTree = async () => {
       try {
         const response = await apiClient.get(`/subjects/${subjectId}/tree`);
+        
+        // Handle real-time initialization redirect
+        if (response.data.redirect) {
+          window.location.href = response.data.redirect;
+          return;
+        }
+
         setSubject(response.data);
         setUserProgress(response.data.userProgress || []);
         setIsEnrolled(response.data.isEnrolled);
       } catch (error) {
+
         console.error("Failed to fetch subject tree", error);
       }
     };

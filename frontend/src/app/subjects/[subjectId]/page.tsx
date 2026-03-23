@@ -1,14 +1,39 @@
-"use client";
-
 import { useSubjectStore } from "@/store/subjectStore";
-import { Play, CheckCircle } from "lucide-react";
+import { cn } from "@/lib/utils";
+
+import { Play, CheckCircle, RefreshCw } from "lucide-react";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { useState } from "react";
+import apiClient from "@/lib/apiClient";
+import { toast } from "sonner"; // Assuming sonner is available or will be added
+
 
 export default function SubjectPage({ params }: { params: { subjectId: string } }) {
-  const { currentSubject: subject, userProgress } = useSubjectStore();
+  const { currentSubject: subject, userProgress, setSubject } = useSubjectStore();
+  const [syncing, setSyncing] = useState(false);
 
   if (!subject) return null;
+
+  const handleSync = async () => {
+    setSyncing(true);
+    try {
+      // We need a playlist ID or just trigger the back-end to find it
+      // For now, we assume the backend knows how to sync this subject
+      // If we don't have a playlistId, we might need to prompt or use a saved one
+      const response = await apiClient.post('/subjects/import-youtube', { 
+        playlistId: subject.slug.startsWith('disc-') ? subject.slug.replace('disc-', '') : subject.title 
+      });
+      setSubject(response.data);
+      alert("Course synchronized successfully!");
+    } catch (e) {
+      console.error("Sync failed", e);
+      alert("Synchronization failed. Please check your connection.");
+    } finally {
+      setSyncing(false);
+    }
+  };
+
 
   // Find first video
   const firstVideo = subject.sections?.[0]?.videos?.[0];
@@ -25,14 +50,28 @@ export default function SubjectPage({ params }: { params: { subjectId: string } 
           <h2 className="text-base font-bold tracking-widest text-accent flex items-center gap-2">
             Course lessons
           </h2>
-          {firstVideo && (
-            <Link 
-              href={`/subjects/${subject.id}/video/${firstVideo.id}`}
-              className="px-6 py-2.5 bg-accent text-black font-bold tracking-widest text-[10px] rounded-xl flex items-center gap-2 hover:scale-105 transition-all shadow-glow"
+          <div className="flex items-center gap-3">
+            <button 
+              onClick={handleSync}
+              disabled={syncing}
+              className={cn(
+                "p-2.5 rounded-xl border border-white/5 hover:bg-white/5 transition-all text-gray-500 hover:text-accent",
+                syncing && "animate-spin text-accent"
+              )}
+              title="Sync with YouTube"
             >
-              <Play className="w-3.5 h-3.5 fill-current" /> Start course
-            </Link>
-          )}
+              <RefreshCw className="w-4 h-4" />
+            </button>
+            {firstVideo && (
+              <Link 
+                href={`/subjects/${subject.id}/video/${firstVideo.id}`}
+                className="px-6 py-2.5 bg-accent text-black font-bold tracking-widest text-[10px] rounded-xl flex items-center gap-2 hover:scale-105 transition-all shadow-glow"
+              >
+                <Play className="w-3.5 h-3.5 fill-current" /> Start course
+              </Link>
+            )}
+          </div>
+
         </div>
 
         {subject.sections?.map((section: any, sIdx: number) => (

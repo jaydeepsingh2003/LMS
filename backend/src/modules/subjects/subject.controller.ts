@@ -151,42 +151,42 @@ export const getSubjectTree = async (req: Request, res: Response) => {
     const userId = BigInt((req as any).user.userId);
     
     // 1. Virtual Mesh Check: If this is an elite preview node, provide instant virtual structure
+    // 1. Virtual Mesh Check: If this is an elite preview node, perform high-speed ingestion before returning
     if (subjectId.startsWith('elite-')) {
-      console.log(`📡 [ResilienceNode] Accessing Virtual Mesh for elite node: ${subjectId}`);
-      const titling: Record<string, string> = {
-        'elite-1': "Harvard CS50: Industrial Foundations",
-        'elite-2': "Meta Front-End Design Architect",
-        'elite-3': "Google Cloud Systems Optimization"
-      };
+      const pid = subjectId.replace('elite-', ''); // Already mapped in listSubjects or hardcoded
+      console.log(`🚀 [ResilienceNode] Accessing Virtual Mesh for elite node: ${subjectId} (Playlist: ${pid})`);
       
-      // Proactive priority ingestion trigger
       const playlistIds: Record<string, string> = {
-        'elite-1': "PLhQjrBD2T382hIW-isO77Prleux82nKSc",
-        'elite-2': "PLl8dD0uOcfGvLpOnv862a93Zf9zHn1UuF",
-        'elite-3': "PLT6W8_b7tqf4DOn_9uPndVmqrZz7U2I7c"
+        'elite-PLhQjrBD2T382hIW-isO77Prleux82nKSc': "PLhQjrBD2T382hIW-isO77Prleux82nKSc",
+        'elite-PLl8dD0uOcfGvLpOnv862a93Zf9zHn1UuF': "PLl8dD0uOcfGvLpOnv862a93Zf9zHn1UuF",
+        'elite-PLT6W8_b7tqf4DOn_9uPndVmqrZz7U2I7c': "PLT6W8_b7tqf4DOn_9uPndVmqrZz7U2I7c"
       };
-      if (playlistIds[subjectId]) {
-        importFromYouTube({ body: { playlistId: playlistIds[subjectId], category: "Engineering", isFeatured: true } } as any, { status: () => ({ json: () => {} }), json: () => {} } as any);
-      }
 
-      return res.json({
-        id: subjectId,
-        title: titling[subjectId] || "Discovering Knowledge...",
-        description: "Establishing high-fidelity link with global learning mesh. (Live Sync in Progress)",
-        sections: [
-          { 
-            id: `v-sec-${subjectId}`, // Explicitly provide unique section ID
-            title: "Synchronization Node 01", 
-            videos: [
-              { id: `v-vid-${subjectId}`, title: "Establishing Connection...", duration_seconds: 0 }
-            ] 
-          }
-        ],
-        userProgress: [],
-        isEnrolled: false,
-        isVirtual: true // Frontend can show a special "Syncing" UI if it sees this
-      });
+      const finalPid = playlistIds[subjectId] || pid;
+
+      if (finalPid && finalPid.length > 5) {
+        // High-priority BLOCKING sync for real-time feel
+        console.log(`📡 [ResilienceNode] Triggering blocking sync for: ${finalPid}`);
+        // We reuse the import logic but make it return the subject ID
+        const data = await getPlaylistData(finalPid);
+        const importedSubject = await prisma.subject.upsert({
+          where: { slug: `${data.title.toLowerCase().replace(/\s+/g, '-')}` },
+          create: {
+            title: data.title,
+            slug: `${data.title.toLowerCase().replace(/\s+/g, '-')}`,
+            description: data.description,
+            is_published: true,
+            is_featured: true,
+            sections: { create: { title: "Course Content", order_index: 1 } }
+          },
+          update: {}
+        });
+
+        // Redirect subjectId to the newly created UUID
+        return res.json({ redirect: `/subjects/${importedSubject.id}` });
+      }
     }
+
 
     const tree = await subjectRepository.getSubjectTree(subjectId);
     if (!tree) return res.status(404).json({ error: 'Master node not found.' });
