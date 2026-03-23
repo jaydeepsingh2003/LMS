@@ -8,6 +8,8 @@ import userRoutes from './modules/users/user.routes.js';
 import subjectRoutes from './modules/subjects/subject.routes.js';
 import videoRoutes from './modules/videos/video.routes.js';
 import aiRoutes from './modules/ai/ai.routes.js';
+import { prisma } from './config/prisma.js';
+
 
 dotenv.config();
 
