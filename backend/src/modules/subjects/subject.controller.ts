@@ -18,6 +18,7 @@ export const importFromYouTube = async (req: Request, res: Response) => {
     const data = await getPlaylistData(playlistId);
 
     // Optimized atomic operation with conflict resolution
+    // 1. Get/Create Subject Shell
     const subject = await prisma.subject.upsert({
       where: { slug: `${data.title.toLowerCase().replace(/\s+/g, '-')}` },
       create: {
@@ -27,34 +28,66 @@ export const importFromYouTube = async (req: Request, res: Response) => {
         category,
         is_published: true,
         is_featured: isFeatured,
-        sections: {
-          create: {
-            title: "Core Curriculum",
-            order_index: 1,
-            videos: {
-              create: data.videos.map((v, i) => ({
-                title: v.title,
-                description: v.description,
-                youtube_url: `https://www.youtube.com/watch?v=${v.id}`,
-                order_index: i + 1,
-                duration_seconds: v.duration || 600,
-              }))
-            }
-          }
-        }
       },
       update: {
         description: data.description,
         is_published: true,
         is_featured: isFeatured
-      },
-      include: {
-        sections: { include: { videos: true } }
       }
     });
 
+    // 2. Get or Create Core Section
+    let section = await prisma.section.findFirst({
+      where: { subject_id: subject.id, order_index: 1 }
+    });
+
+    if (!section) {
+      section = await prisma.section.create({
+        data: {
+          subject_id: subject.id,
+          title: "Core Curriculum",
+          order_index: 1
+        }
+      });
+    }
+
+    // 3. Sync Videos (Upsert each video based on title+section)
+    // We use title-based matching as a simple way to avoid duplicates if ID changes but content is same
+    console.log(`📡 [SubjectController] Syncing ${data.videos.length} videos for: ${subject.title}`);
+    
+    for (const [i, v] of data.videos.entries()) {
+      await prisma.video.upsert({
+        where: { 
+          section_id_order_index: { 
+            section_id: section.id, 
+            order_index: i + 1 
+          } 
+        },
+        create: {
+          section_id: section.id,
+          title: v.title,
+          description: v.description,
+          youtube_url: `https://www.youtube.com/watch?v=${v.id}`,
+          order_index: i + 1,
+          duration_seconds: v.duration || 600,
+        },
+        update: {
+          title: v.title,
+          description: v.description,
+          youtube_url: `https://www.youtube.com/watch?v=${v.id}`,
+          duration_seconds: v.duration || 600,
+        }
+      });
+    }
+
+    const finalSubject = await prisma.subject.findUnique({
+      where: { id: subject.id },
+      include: { sections: { include: { videos: true } } }
+    });
+
     console.log(`✅ [SubjectController] Successfully synchronized: ${subject.title}`);
-    res.status(201).json(subject);
+    res.status(201).json(finalSubject);
+
   } catch (error: any) {
     console.error(`❌ [SubjectController] Ingestion Failed:`, error.message);
     res.status(500).json({ 
