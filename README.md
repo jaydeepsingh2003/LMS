@@ -1,6 +1,7 @@
 # LMS - Learning Management System
 
-A modern, full-stack Learning Management System built with **Next.js**, **Node.js**, **Prisma**, and **PostgreSQL**.
+A modern, full-stack Learning Management System built with **Next.js**, **Node.js**, **Prisma**, and **Aiven MySQL**.
+
 
 ## 🚀 Features
 
@@ -22,7 +23,8 @@ A modern, full-stack Learning Management System built with **Next.js**, **Node.j
 ### Backend
 - **Runtime**: Node.js
 - **Framework**: Express / Fastify (TypeScript)
-- **Database**: PostgreSQL
+- **Database**: Aiven MySQL (Cloud)
+
 - **ORM**: Prisma
 - **Auth**: JWT & Bcrypt
 
@@ -42,7 +44,8 @@ A modern, full-stack Learning Management System built with **Next.js**, **Node.j
 
 ### Prerequisites
 - Node.js (v18+)
-- PostgreSQL
+- Aiven MySQL Cloud Instance
+
 
 ### Installation
 
@@ -56,8 +59,8 @@ A modern, full-stack Learning Management System built with **Next.js**, **Node.j
    ```bash
    cd backend
    npm install
-   # Create .env file and run migrations
-   npx prisma migrate dev
+   # Create .env file with Aiven URL and sync schema
+   npx prisma db push
    npm run dev
    ```
 
