@@ -1,0 +1,151 @@
+@import "tailwindcss";
+
+@theme {
+  --color-background: #050505;
+  --color-accent: #ffb800;
+  --color-accent-muted: rgba(255, 184, 0, 0.2);
+  --color-card: #111111;
+  --color-border: #222222;
+}
+
+:root {
+  --background: #050505;
+  --foreground: #ffffff;
+  --accent: #ffb800;
+  --accent-muted: rgba(255, 184, 0, 0.2);
+  --card: #111111;
+  --card-foreground: #eeeeee;
+  --border: #222222;
+  --ring: #ffb800;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+}
+
+@layer components {
+  .glass-card-premium {
+    @apply bg-black/40 backdrop-blur-3xl border border-white/5 shadow-[0_30px_100px_rgba(0,0,0,0.6)] rounded-[2.5rem];
+  }
+
+  .premium-pill {
+    @apply px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-[0.2em] bg-white/5 border border-white/10 text-gray-400 group-hover:border-accent/40 group-hover:text-accent transition-all duration-500;
+  }
+  
+  .premium-button {
+    @apply px-10 py-5 rounded-3xl font-black uppercase tracking-[0.15em] text-xs transition-all duration-700 relative overflow-hidden active:scale-95 flex items-center justify-center gap-3 backdrop-blur-md;
+    background: linear-gradient(135deg, #ffb800 0%, #ff6b00 100%);
+    box-shadow: 0 10px 40px -10px rgba(255, 184, 0, 0.4);
+    color: #000;
+  }
+
+  .premium-button:hover {
+    box-shadow: 0 20px 60px -10px rgba(255, 184, 0, 0.6);
+    transform: translateY(-4px);
+  }
+
+  /* Animated Border Effect */
+  .animated-border {
+    position: relative;
+    z-index: 10;
+  }
+  .animated-border::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    background: linear-gradient(90deg, transparent, #ffb800, transparent);
+    z-index: -1;
+    border-radius: inherit;
+    opacity: 0;
+    transition: opacity 0.5s;
+    animation: borderRotate 3s linear infinite;
+  }
+  .animated-border:hover::before {
+    opacity: 1;
+  }
+
+  @keyframes borderRotate {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 100% 50%; }
+  }
+}
+
+/* Advanced Transitions */
+.page-transition {
+  animation: pageIn 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes pageIn {
+  0% { opacity: 0; filter: blur(20px); transform: translateY(30px); }
+  100% { opacity: 1; filter: blur(0); transform: translateY(0); }
+}
+
+@keyframes glow-pulse {
+  0%, 100% { opacity: 0.3; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(1.1); }
+}
+
+.mesh-background {
+  position: fixed;
+  inset: 0;
+  z-index: -10;
+  background-color: #050505;
+  background-image: 
+    radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%),
+    radial-gradient(at 100% 0%, hsla(225,39%,20%,0.3) 0, transparent 50%),
+    radial-gradient(at 50% 100%, hsla(339,49%,15%,0.2) 0, transparent 50%);
+  filter: blur(80px);
+}
+
+.glow-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+.glow-shimmer::after {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255,184,0,0.1) 0%, transparent 60%);
+  animation: shimmer-rotate 8s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes shimmer-rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+@keyframes shimmer-slow {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.animate-shimmer-slow {
+  animation: shimmer-slow 3s linear infinite;
+  background-image: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.1) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  background-size: 200% 100%;
+}
