@@ -38,6 +38,18 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok' });
 });
 
+// Database connectivity check
+app.get('/api/db-check', async (req, res) => {
+  try {
+    await prisma.$queryRaw`SELECT 1`;
+    res.json({ status: 'connected', message: 'Database is reachable' });
+  } catch (error: any) {
+    console.error('❌ [DB_CHECK_FAILED]:', error.message);
+    res.status(500).json({ status: 'error', message: error.message });
+  }
+});
+
+
 // For Vercel Serverless Functions
 export default app;
 
